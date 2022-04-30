@@ -7,7 +7,7 @@ echo "[Compiling binaries]"
 echo 
 
 nasm ../src/bootloader.s -o bootloader.bin
-gcc -c ../src/kernel.c -o kernel.obj -ffreestanding -Wall -Wextra -ffreestanding -fno-asynchronous-unwind-tables
+gcc -g -c ../src/kernel.c -o kernel.obj -ffreestanding -Wall -Wextra -ffreestanding -fno-asynchronous-unwind-tables
 ld -Ttext 0x7E00 -o kernel.elf -T ../linker.ld kernel.obj -nostdlib
 
 
@@ -45,5 +45,19 @@ then
 	echo "[Exporting OS]"
 	echo
 
-	dd if=bin/os.img of=/dev/sdb count=1
+	if [ -e "/dev/sdb" ]
+	then
+	  sudo dd if=bin/os.img of=/dev/sdb count=1 bs=4096
+	else
+		echo "Insert USB!"
+	fi
+fi
+
+if [ $# -eq 3 ]
+then
+	echo
+	echo "[Debugging program]"
+	echo
+
+	qemu-system-x86_64 -s -S bin/os.img
 fi

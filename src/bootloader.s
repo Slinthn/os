@@ -37,6 +37,9 @@ GDT:
 ; code
 
 MainEntry16:
+	mov ax, 0
+	mov es, ax
+
 	mov ah, 0x2
 	mov al, 0x20
 	xor ch, ch
@@ -67,7 +70,6 @@ MainEntry16:
 bits 32
 
 MainEntry32:
-
 	mov edi, 0x1000
 	mov cr3, edi
 	xor eax, eax
@@ -96,6 +98,7 @@ MainEntry32:
 	mov eax, cr4
 	or eax, 1 << 5
 	mov cr4, eax
+
 	mov ecx, 0xC0000080
 	rdmsr
 	or eax, 1 << 8
