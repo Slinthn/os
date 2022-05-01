@@ -7,8 +7,9 @@ echo "[Compiling binaries]"
 echo 
 
 nasm ../src/bootloader.s -o bootloader.bin
-gcc -g -c ../src/kernel.c -o kernel.obj -ffreestanding -Wall -Wextra -ffreestanding -fno-asynchronous-unwind-tables
-ld -Ttext 0x7E00 -o kernel.elf -T ../linker.ld kernel.obj -nostdlib
+nasm ../src/kernel.s -g -f elf64 -o kernels.obj
+gcc -g -c ../src/kernel.c -o kernelc.obj -ffreestanding -Wall -Wextra -ffreestanding -fno-asynchronous-unwind-tables
+ld -Ttext 0x7E00 -o kernel.elf -T ../linker.ld kernelc.obj kernels.obj -nostdlib
 
 
 if [ $? -ne 0 ]
@@ -16,7 +17,7 @@ then
 	exit
 fi
 
-objcopy --remove-section .comment --remove-section .data.rel.local --remove-section .note.gnu.property -O binary kernel.elf kernel.bin
+objcopy --remove-section .comment --remove-section .note.gnu.property -O binary kernel.elf kernel.bin
 cat bootloader.bin kernel.bin > os.bin
 
 echo
@@ -36,7 +37,7 @@ then
 	echo "[Running program]"
 	echo
 
-	qemu-system-x86_64 bin/os.img
+	qemu-system-x86_64 -d cpu_reset,guest_errors,pcall,int,mmu bin/os.img -D bin/log.txt -monitor stdio
 fi
 
 if [ $# -eq 2 ]
@@ -59,5 +60,5 @@ then
 	echo "[Debugging program]"
 	echo
 
-	qemu-system-x86_64 -s -S bin/os.img
+	qemu-system-x86_64 -s -S bin/os.img -D bin/log.txt -monitor stdio
 fi
