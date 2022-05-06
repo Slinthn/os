@@ -1,8 +1,6 @@
 bits 64
 
-global KeyboardInterruptRequestHandler
-extern KeyboardService
-KeyboardInterruptRequestHandler:
+%macro pusha 0
   push rax
   push rbx
   push rcx
@@ -19,12 +17,9 @@ KeyboardInterruptRequestHandler:
   push r13
   push r14
   push r15
-    
-  call KeyboardService
-    
-  mov al, 0x20
-  out 0x20, al
+%endmacro
 
+%macro popa 0
   pop r15
   pop r14
   pop r13
@@ -41,7 +36,32 @@ KeyboardInterruptRequestHandler:
   pop rcx
   pop rbx
   pop rax
+%endmacro
 
+global KeyboardInterruptRequestHandler
+extern KeyboardService
+KeyboardInterruptRequestHandler:
+  pusha
+ 
+  call KeyboardService
+    
+  mov al, 0x20
+  out 0x20, al
+
+  popa
+  iretq
+
+global TimerInterruptRequestHandler
+extern TimerService
+TimerInterruptRequestHandler:
+  pusha
+ 
+  call TimerService
+    
+  mov al, 0x20
+  out 0x20, al
+
+  popa
   iretq
 
 global ConsoleSetCursorPosition:
@@ -86,4 +106,22 @@ ConsoleGetCursorPosition:
   xor rax, rax 
   mov ax, bx
 
+  ret
+
+
+
+
+global PITSetup
+PITSetup:
+  cli
+
+  mov al, 0b00110100
+  out 0x43, al
+
+  mov eax, 0x10000
+  out 0x40, al
+  mov al, ah
+  out 0x40, al
+
+  sti
   ret
