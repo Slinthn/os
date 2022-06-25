@@ -15,9 +15,9 @@ void KeyboardService(void) {
 void TimerService(void) {
   HeaderUpdate();
 }
-__attribute__((aligned(0x10))) idt_entry_t idtentries[0x100] = {0};
-__attribute__((aligned(0x10))) idt_descriptor_t idtdescriptor = {0};
 
+idt_entry_t idtentries[0x100] = {0};
+idt_descriptor_t idtdescriptor = {0};
 
 void CreateInterruptDescriptorTable(void) {
   asm(
